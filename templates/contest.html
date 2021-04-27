@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+  <title>Contest Diary</title>
+
+  <style>
+    .container div {
+      width: 280px;
+      height: 500px;
+      background-color: rgb(134, 224, 247);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+    }
+
+    .container .item1 { height: 200px; }
+    .container .item4 { height: 800px; }
+    .container .item6 { height: 600px; }
+    .container .item11 { height: 400px; }
+  </style>
+
+</head>
+<body>
+  <h1 >LIVE Matches</h1>
+  <div class="container">
+    <a href='/team'><div class="item1">Match 1</div></a>
+    <a href='/team'><div class="item2">Match 2</div></a>
+    <a href='/team'><div class="item3">Match 3</div></a>
+    <a href='/team'><div class="item4">Match 4</div></a>
+    <a href='/team'><div class="item5">Match 5</div></a>
+    <div class="item6">Match 6</div>
+    <div class="item7">Match 7</div>
+    <div class="item8">Match 8</div>
+    <div class="item9">Match 9</div>
+    <div class="item10">Match 10</div>
+    
+  </div>
+
+  <h1 >Upcoming Matches</h1>
+  <div class="container">
+    <div class="item1">Match 1</div>
+    <div class="item2">Match 2</div>
+    <div class="item3">Match 3</div>
+    <div class="item4">Match 4</div>
+    <div class="item5">Match 5</div>
+    
+    
+  </div>
+
+  <script src="../static/dist/magic-grid.min.js"></script>
+  <script>
+      let magicGrid = new MagicGrid({
+        container: '.container',
+        animate: true,
+        gutter: 30,
+        static: true,
+        useMin: true
+      });
+
+      magicGrid.listen();
+  </script>
+
+</body>
+</html>
