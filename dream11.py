@@ -1,4 +1,7 @@
 from flask import Flask, render_template, request, url_for, redirect
+from cassandra.cluster import Cluster
+
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -11,6 +14,13 @@ def register():
         return render_template('register.html')
     else:
         # store credentials of new user
+        try:
+            clstr=Cluster()
+            session=clstr.connect('userdb')
+            session.execute("insert into User (username, password) values (%s, %s);", (request.form["username"], request.form["pass"]))
+        except: 
+            print ("Invalid Registration!")
+        
         return render_template('login.html')
 
 @app.route('/login',methods = ['POST', 'GET']) 
@@ -19,6 +29,12 @@ def login():
         return render_template('login.html')
     else:
         # match credentials entered
+        username= request.form['username']
+        clstr=Cluster()
+        session=clstr.connect('userdb')
+        # session.execute("select * from User where username= vedu;")
+        # print (password)
+
         return render_template('contest.html')
 
 @app.route('/team')

@@ -1,67 +1,98 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Contest Diary</title>
+  <meta name="keywords" content="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod.">
+  <meta name="description" content="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod.">
 
-  <style>
-    .container div {
-      width: 280px;
-      height: 500px;
-      background-color: rgb(134, 224, 247);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 8px;
-    }
-
-    .container .item1 { height: 200px; }
-    .container .item4 { height: 800px; }
-    .container .item6 { height: 600px; }
-    .container .item11 { height: 400px; }
-  </style>
-
+  <link rel="stylesheet" href="/static/assets/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/assets/fonts/flat-icon/flaticon.css">
+  <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-  <h1 >LIVE Matches</h1>
-  <div class="container">
-    <a href='/team'><div class="item1">Match 1</div></a>
-    <a href='/team'><div class="item2">Match 2</div></a>
-    <a href='/team'><div class="item3">Match 3</div></a>
-    <a href='/team'><div class="item4">Match 4</div></a>
-    <a href='/team'><div class="item5">Match 5</div></a>
-    <div class="item6">Match 6</div>
-    <div class="item7">Match 7</div>
-    <div class="item8">Match 8</div>
-    <div class="item9">Match 9</div>
-    <div class="item10">Match 10</div>
-    
+  <div id="content-wrapper">
+  
+
+
+    <section class="team team--bg">
+      <div class="container">
+        <div class="page-section">
+          <div class="text-center">
+            <h2 class="page-section__title">LIVE Matches</h2>
+            <div class="team__title-style">
+              <span class="first-line"></span>
+              <span class="second-line"></span>
+            </div>
+            <p class="page-section__subtitle">Select YOUR Team and begin the FUN!!</p>
+          </div>
+          <div class="row gutters-80">
+            <div class="col-md-4">
+              <div class="thumbnail team__single">
+                <div class="bio text-center">
+                  <img src="/static/assets/images/ashes.jpg" alt="">
+                  <h2>The Ashes</h2>
+                  <p>Austraia v/s England</p>
+                </div>
+                <div class="caption">
+                  <!-- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, </p> -->
+                  <a class="button" name='ashes' href="/team">Create Team</a>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="thumbnail team__single">
+                <div class="bio text-center">
+                  <img src="/static/assets/images/wisden.jpeg" alt="">
+                  <h2>The Wisden Trophy </h2>
+                  <p>West Indies v/s England</p>
+                </div>
+                <div class="caption">
+                  <!-- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, </p> -->
+                  <a class="button" name='wisden' href="/team">Create Team</a>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="thumbnail team__single">
+                <div class="bio text-center">
+                  <img src="/static/assets/images/pataudi.jpeg" alt="">
+                  <h2>Pataudi Trophy</h2>
+                  <p>India v/s England</p>
+                </div>
+                <div class="caption">
+                  <!-- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, </p> -->
+                  <a class="button" name='pataudi' href="/team">Create Team</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <h1 >Upcoming Matches</h1>
-  <div class="container">
-    <div class="item1">Match 1</div>
-    <div class="item2">Match 2</div>
-    <div class="item3">Match 3</div>
-    <div class="item4">Match 4</div>
-    <div class="item5">Match 5</div>
-    
-    
-  </div>
 
-  <script src="../static/dist/magic-grid.min.js"></script>
+
+
+
+
+  <script src="/static/assets/jquery/jquery-3.2.1.min.js"></script>
+  <script src="/static/assets/bootstrap/js/bootstrap.min.js"></script>
+  <!-- <script src="assets/owl-slider/owl.carousel.min.js"></script> -->
+
   <script>
-      let magicGrid = new MagicGrid({
-        container: '.container',
-        animate: true,
-        gutter: 30,
-        static: true,
-        useMin: true
+    $(document).ready(function() {
+      
+      $('button').click( function(e) {
+        $('.collapse').collapse('hide');
       });
 
-      magicGrid.listen();
-  </script>
 
+      
+    });
+  </script>
 </body>
-</html>
+</html>  
+
