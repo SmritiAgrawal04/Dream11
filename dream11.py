@@ -37,7 +37,7 @@ def login():
         password= session.execute(query)[0][0]
 
         if password == request.form['pass']:
-            return render_template('contest.html')
+            return render_template('contest.html', username= username)
         else:
              return "Invalid Login"
 
@@ -45,6 +45,7 @@ def login():
 def team():
     if request.method == 'GET':
         match= request.args.get('match')
+        # username= request.args.get('username')
         team1, team2= [], []
 
         if match == 'ashes':
@@ -67,12 +68,29 @@ def team():
 
     else:
         match= request.form['match']
-        
+        username= request.form['username']
+        players= []
         for i in range (1, 23):
             try:
-                print (request.form[str(i)])
+                players.append (request.form[str(i)])
             except:
                 pass
+
+        # save the username corresponding to each player in the database
+        clstr=Cluster()
+        session=clstr.connect('playermapping')
+        
+        for player in players:
+            query= "select usernames from "+match+ " where player='"+player+"';"
+            result= session.execute(query)
+            print ("************************",result)
+            if result:
+                # enter into DB
+                query= "update "+match+ " set usernames= usernames + [" +username+ "] where player='"+player+"';"
+                session.execute(query)
+            else:
+                query= "insert into "+match+ "(player, usernames, score) values (%s, %s, %s);" 
+                session.execute(query, (player, [], 0))
         return render_template('dashboard.html')
 
 # def dashboard():
