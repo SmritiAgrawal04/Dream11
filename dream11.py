@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, url_for, redirect
 from cassandra.cluster import Cluster
-
+import os
 
 app = Flask(__name__)
 
@@ -30,16 +30,53 @@ def login():
     else:
         # match credentials entered
         username= request.form['username']
+
         clstr=Cluster()
         session=clstr.connect('userdb')
-        # session.execute("select * from User where username= vedu;")
-        # print (password)
+        query= "select password from User where username='"+username+"';"
+        password= session.execute(query)[0][0]
 
-        return render_template('contest.html')
+        if password == request.form['pass']:
+            return render_template('contest.html')
+        else:
+             return "Invalid Login"
 
-@app.route('/team')
+@app.route('/team',methods = ['POST', 'GET'])
 def team():
-   return render_template('team.html')
+    if request.method == 'GET':
+        match= request.args.get('match')
+        team1, team2= [], []
+
+        if match == 'ashes':
+            f= open('teams/ashes.txt')
+            teams= f.read().split('----')
+            team1, team2= teams[0].split('\n')[1:12], teams[1].split('\n')[2:13]
+            
+        elif match == 'wisden':
+            f= open('teams/wisden.txt')
+            teams= f.read().split('----')
+            team1, team2= teams[0].split('\n')[1:12], teams[1].split('\n')[2:13]
+            
+        elif match == 'pataudi':
+            f= open('teams/pataudi.txt')
+            teams= f.read().split('----')
+            team1, team2= teams[0].split('\n')[1:12], teams[1].split('\n')[2:13]
+
+        
+        return render_template('team.html', match= match, team1= team1, team2= team2)
+
+    else:
+        match= request.form['match']
+        
+        for i in range (1, 23):
+            try:
+                print (request.form[str(i)])
+            except:
+                pass
+        return render_template('dashboard.html')
+
+# def dashboard():
+
 
 if __name__ == '__main__':
    app.run()
