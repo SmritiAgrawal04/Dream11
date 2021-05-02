@@ -39,13 +39,13 @@ def login():
         if password == request.form['pass']:
             return render_template('contest.html', username= username)
         else:
-             return "Invalid Login"
+             return render_template('login.html',Message='Invalid User!!')
 
 @app.route('/team',methods = ['POST', 'GET'])
 def team():
     if request.method == 'GET':
         match= request.args.get('match')
-        # username= request.args.get('username')
+        user_n= request.args.get('username')
         team1, team2= [], []
 
         if match == 'ashes':
@@ -64,11 +64,13 @@ def team():
             team1, team2= teams[0].split('\n')[1:12], teams[1].split('\n')[2:13]
 
         
-        return render_template('team.html', match= match, team1= team1, team2= team2)
+        return render_template('team.html', match= match, team1= team1, team2= team2,username=user_n)
 
     else:
         match= request.form['match']
         username= request.form['username']
+        
+        print('got match .... ',match)
         players= []
         for i in range (1, 23):
             try:
@@ -80,17 +82,31 @@ def team():
         clstr=Cluster()
         session=clstr.connect('playermapping')
         
+       
         for player in players:
             query= "select usernames from "+match+ " where player='"+player+"';"
             result= session.execute(query)
             print ("************************",result)
             if result:
                 # enter into DB
-                query= "update "+match+ " set usernames= usernames + [" +username+ "] where player='"+player+"';"
+                print('got username .... ',username)
+                query= "update "+match+ " set usernames= usernames + " +username+ " where player='"+player+"';"
                 session.execute(query)
             else:
                 query= "insert into "+match+ "(player, usernames, score) values (%s, %s, %s);" 
-                session.execute(query, (player, [], 0))
+                session.execute(query, (player, [username], 0))
+        
+        #enter username in userScore cluster
+        user_session = clstr.connect('userscore')
+        # qry = 'insert into '+match+" (username,score) values ("+username+","+"0);"
+        # print(qry)
+       
+        # match = match[0].upper() 
+        print('-----------------------',match)
+        print('-----------------------',username)
+
+        user_session.execute("insert into ashes (username, score) values (%s, %s);", (username,0))
+
         return render_template('dashboard.html')
 
 # def dashboard():

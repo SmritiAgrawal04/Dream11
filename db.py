@@ -77,3 +77,5 @@ create table Pataudi (
    primary key(player)
 );'''
 session.execute(qry)
+
+
