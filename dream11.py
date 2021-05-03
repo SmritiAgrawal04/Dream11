@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, url_for, redirect
 from flask import jsonify
-
+import requests as rq
 from cassandra.cluster import Cluster
 import os
 from cassandra.query import tuple_factory
 import threading 
+import sys
+import psutil
 
 app = Flask(__name__)
 
@@ -225,6 +227,7 @@ def dashboard():
         print("all_users: ",all_users)
         return render_template('dashboard.html',all_users=all_users,top_players=top_players)
      
+
 @app.route('/logout',methods = ['POST', 'GET'])
 def logout():
     func = request.environ.get('werkzeug.server.shutdown')
@@ -233,5 +236,29 @@ def logout():
     func()
     return render_template('logout.html')
 
+@app.route('/getLoad',methods = ['POST', 'GET'])
+def getLoad():
+    memory = psutil.virtual_memory().percent
+    cpu = psutil.cpu_percent()
+    req = {'memory':memory,'cpu':cpu}
+    return jsonify(req)
+
+def heartBeat(server_id):
+    server_url = 'http://127.0.0.1:5003/heartbeat'
+    while True:	
+        print('sending heartbeat')
+		# print("heartbeat sent -- ", service_id)
+        r = {'service_id':str(server_id)}
+        rsp = rq.post(server_url, json = r)
+        print("hitting again")
+        time.sleep(2)
+
+
 if __name__ == '__main__':
-   app.run()
+    server_id = sys.argv[1]
+    slave_port = sys.argv[2]
+    print(server_id)
+    getLoad()
+    thread1 = threading.Thread(target = heartBeat,args=(server_id,))
+    thread1.start()    
+    app.run(port=slave_port)
