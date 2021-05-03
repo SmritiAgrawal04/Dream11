@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, url_for, redirect
+from flask import jsonify
+
 from cassandra.cluster import Cluster
 import os
 from cassandra.query import tuple_factory
@@ -131,36 +133,28 @@ def team():
         print('-----------------------',username)
         query = "insert into "+match+ "(username, score) values (%s, %s);"
         user_session.execute(query,(username,0))
-        
-        
-        #get all user details 
-        user_session.row_factory = tuple_factory
-        query = "select * from "+match+";"
-        user_details = user_session.execute(query) 
-        all_users=[]
-        for user in user_details:
-            # print(user)
-            user_n = user[0]
-            user_s = user[1]
-            all_users.append([user_n,user_s])
-        all_users.sort(key = lambda x: x[1],reverse = True)
-        print("all_users...............",all_users)
-        top_players = min(3,len(all_users))
-        return render_template('dashboard.html',all_users=all_users,top_players=top_players)
+
+        return redirect(url_for('dashboard',match=match))       
+        # return render_template('dashboard.html',all_users=all_users,top_players=top_players)
 
 # def dashboard():
 def updateUser(user_list, match, score):
+    clstr = Cluster()
+    user_session=clstr.connect('userscore')
     for user in user_list :
-        user_session=clstr.connect('userscore')
+        
         query = "select score from "+match+" where username='"+user+"';"
-        curr_score = user_session.execute(query)[0][0]
+        curr_score = user_session.execute(query).one()[0]
         updated_score = curr_score+score
-        query = "update "+match+" set score ="+str(updated_score)+"where username = '"+user+"';"
+        print('new Score is .... ',updated_score)
+        query = "update "+match+" set score ="+str(updated_score)+" where username = '"+user+"';"
         user_session.execute(query)
+    
         
 
 @app.route('/match_updates',methods = ['POST', 'GET']) 
 def match_updates():
+    print("inside match updates")
     data = request.args
     match = data['match']
     player = data['player']
@@ -174,19 +168,43 @@ def match_updates():
         score = 2
     
     # find all users for the player
+    print("player is ",player)
     clstr=Cluster()
     session=clstr.connect('playermapping')
     query= "select usernames from "+match+ " where player='"+player+"';"
-    user_list = session.execute(query)
+    user_list = session.execute(query).one()[0]
     print("users are:    ",user_list)
     user_list = user_list.split('|')
     print("list of users:    ",user_list)
 
-    
-    t1 = threading.Thread(target=updateUser,args=(user_list, match, score,))
-    t1.start()
-    
     #update scores
+    updateUser(user_list,match,score)
+    return jsonify({'status':'done'})
+    
+@app.route('/dashboard',methods = ['POST', 'GET'])
+def dashboard():
+    if request.method == 'GET':
+        match = request.args.get('match')
+        
+        #get all user details
+        print("inside dashboard..........")
+        clstr = Cluster()
+        user_session=clstr.connect('userscore')
+        user_session.row_factory = tuple_factory
+        query = "select * from "+match+";"
+        user_details = user_session.execute(query) 
+        all_users=[]
+        for user in user_details:
+            # print(user)
+            user_n = user[0]
+            user_s = user[1]
+            all_users.append([user_n,user_s])
+        all_users.sort(key = lambda x: x[1],reverse = True)
+        print("all_users...............",all_users)
+        top_players = min(3,len(all_users))
+        print("Inside dashboard...")
+        print("all_users: ",all_users)
+        return render_template('dashboard.html',all_users=all_users,top_players=top_players)
      
 
 
