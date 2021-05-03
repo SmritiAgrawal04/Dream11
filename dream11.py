@@ -132,11 +132,18 @@ def team():
         return render_template('dashboard.html',all_users=all_users,top_players=top_players)
 
 # def dashboard():
-def updateUser():
-    
+def updateUser(user_list, match, score):
+    for user in user_list :
+        user_session=clstr.connect('userscore')
+        query = "select score from "+match+" where username='"+user+"';"
+        curr_score = user_session.execute(query)[0][0]
+        updated_score = curr_score+score
+        query = "update "+match+" set score ="+str(updated_score)+"where username = '"+user+"';"
+        user_session.execute(query)
+        
 
 @app.route('/match_updates',methods = ['POST', 'GET']) 
-def match_updates(match,player,score_type){
+def match_updates():
     data = request.args
     match = data['match']
     player = data['player']
@@ -158,17 +165,12 @@ def match_updates(match,player,score_type){
     user_list = user_list.split('|')
     print("list of users:    ",user_list)
 
-    for user in user_list :
-        user_session=clstr.connect('userscore')
-        query = "select score from "+match+" where username="
-        query = "update "+match+" set score =" 
-    t1 = threading.Thread(target=updateUser,args=())
-    t1.start()
     
+    t1 = threading.Thread(target=updateUser,args=(user_list, match, score,))
+    t1.start()
     
     #update scores
      
-}
 
 
 if __name__ == '__main__':
