@@ -46,30 +46,47 @@ def login():
         else:
              return render_template('login.html',Message='Invalid User!!')
 
+def split_NameType(team1_NameType, team2_NameType):
+    team1, team2, team1type, team2type= [], [], [], []
+    for player in team1_NameType:
+        name, player_type= player.split(':')
+        team1.append(name)
+        team1type.append(player_type)
+
+    for player in team2_NameType:
+        name, player_type= player.split(':')
+        team2.append(name)
+        team2type.append(player_type)
+
+    return team1, team2, team1type, team2type
+
 @app.route('/team',methods = ['POST', 'GET'])
 def team():
     if request.method == 'GET':
         match= request.args.get('match')
         user_n= request.args.get('username')
-        team1, team2= [], []
+        team1, team2, team1type, team2type= [], [], [], []
 
         if match == 'ashes':
             f= open('teams/ashes.txt')
             teams= f.read().split('----')
-            team1, team2= teams[0].split('\n')[1:12], teams[1].split('\n')[2:13]
+            team1_NameType, team2_NameType= teams[0].split('\n')[1:12], teams[1].split('\n')[2:13]
+            team1, team2, team1type, team2type= split_NameType(team1_NameType, team2_NameType)
             
         elif match == 'wisden':
             f= open('teams/wisden.txt')
             teams= f.read().split('----')
-            team1, team2= teams[0].split('\n')[1:12], teams[1].split('\n')[2:13]
+            team1_NameType, team2_NameType= teams[0].split('\n')[1:12], teams[1].split('\n')[2:13]
+            team1, team2, team1type, team2type= split_NameType(team1_NameType, team2_NameType)
             
         elif match == 'pataudi':
             f= open('teams/pataudi.txt')
             teams= f.read().split('----')
-            team1, team2= teams[0].split('\n')[1:12], teams[1].split('\n')[2:13]
+            team1_NameType, team2_NameType= teams[0].split('\n')[1:12], teams[1].split('\n')[2:13]
+            team1, team2, team1type, team2type= split_NameType(team1_NameType, team2_NameType)
 
         
-        return render_template('team.html', match= match, team1= team1, team2= team2,username=user_n)
+        return render_template('team.html', match= match, team1= team1, team2= team2, team1type= team1type, team2type= team2type, username=user_n)
 
     else:
         match= request.form['match']

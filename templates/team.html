@@ -171,7 +171,7 @@
 
             <label>
                 <input type="checkbox" name={{i}} value={{team1[i-1]}} class="option-input checkbox" />
-                {{team1[i-1]}}
+                {{team1[i-1]}}- {{team1type[i-1]}}
             </label>
         {%endfor%}
       </div>
@@ -186,7 +186,7 @@
         {%for i in range(12, 23)%}
             <label>
                 <input type="checkbox" name={{i}} value={{team2[i-12]}} class="option-input checkbox" />
-                {{team2[i-12]}}
+                {{team2[i-12]}}- {{team2type[i-12]}}
             </label>
         {%endfor%}
       </div>
