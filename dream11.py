@@ -6,6 +6,7 @@ import os
 from cassandra.query import tuple_factory
 import threading 
 import sys
+import time
 import psutil
 
 app = Flask(__name__)
@@ -31,11 +32,12 @@ def register():
 
 @app.route('/login',methods = ['POST', 'GET']) 
 def login(): 
-    if request.method == 'GET':
-        return render_template('login.html')
-    else:
-        # match credentials entered
-        username= request.form['username']
+	if request.method == 'GET':
+		return render_template('login.html')
+	else:
+		# match credentials entered
+		username= request.form['username']
+
 
         clstr=Cluster()
         session=clstr.connect('userdb')
@@ -44,30 +46,34 @@ def login():
         password, matches= result.one()[0], result.one()[1]
         print ("$$$$$$$$$", matches, "$$$$$$$$$$")
 
-        if not password :
-            return render_template('login.html',Message='Invalid User!!')
+
+		if not password :
+			return render_template('login.html',Message='Invalid User!!')
+
 
         if password == request.form['pass']:
             return render_template('contest.html', username= username, matches= matches)
         else:
              return render_template('login.html',Message='Invalid User!!')
 
+
 def split_NameType(team1_NameType, team2_NameType):
-    team1, team2, team1type, team2type= [], [], [], []
-    for player in team1_NameType:
-        name, player_type= player.split(':')
-        team1.append(name)
-        team1type.append(player_type)
+	team1, team2, team1type, team2type= [], [], [], []
+	for player in team1_NameType:
+		name, player_type= player.split(':')
+		team1.append(name)
+		team1type.append(player_type)
 
-    for player in team2_NameType:
-        name, player_type= player.split(':')
-        team2.append(name)
-        team2type.append(player_type)
+	for player in team2_NameType:
+		name, player_type= player.split(':')
+		team2.append(name)
+		team2type.append(player_type)
 
-    return team1, team2, team1type, team2type
+	return team1, team2, team1type, team2type
 
 @app.route('/team',methods = ['POST', 'GET'])
 def team():
+
     if request.method == 'GET':
         match= request.args.get('match')
         user_n= request.args.get('username')
@@ -158,52 +164,54 @@ def team():
         return redirect(url_for('dashboard',match=match))       
         # return render_template('dashboard.html',all_users=all_users,top_players=top_players)
 
+
 # def dashboard():
 def updateUser(user_list, match, score):
-    clstr = Cluster()
-    user_session=clstr.connect('userscore')
-    for user in user_list :
-        
-        query = "select score from "+match+" where username='"+user+"';"
-        curr_score = user_session.execute(query).one()[0]
-        updated_score = curr_score+score
-        print('new Score is .... ',updated_score)
-        query = "update "+match+" set score ="+str(updated_score)+" where username = '"+user+"';"
-        user_session.execute(query)
-    
-        
+	clstr = Cluster()
+	user_session=clstr.connect('userscore')
+	for user in user_list :
+		
+		query = "select score from "+match+" where username='"+user+"';"
+		curr_score = user_session.execute(query).one()[0]
+		updated_score = curr_score+score
+		print('new Score is .... ',updated_score)
+		query = "update "+match+" set score ="+str(updated_score)+" where username = '"+user+"';"
+		user_session.execute(query)
+	
+		
 
 @app.route('/match_updates',methods = ['POST', 'GET']) 
 def match_updates():
-    print("inside match updates")
-    data = request.args
-    match = data['match']
-    player = data['player']
-    score_type = data['score']
+	print("inside match updates")
+	data = request.args
+	match = data['match']
+	player = data['player']
+	score_type = data['score']
 
-    if(score_type == 'six'):
-        score = 6
-    elif(score_type == 'four'):
-        score = 4
-    elif(score_type == 'wicket'):
-        score = 2
-    
-    # find all users for the player
-    print("player is ",player)
-    clstr=Cluster()
-    session=clstr.connect('playermapping')
-    query= "select usernames from "+match+ " where player='"+player+"';"
-    user_list = session.execute(query).one()[0]
-    print("users are:    ",user_list)
-    user_list = user_list.split('|')
-    print("list of users:    ",user_list)
+	if(score_type == 'six'):
+		score = 6
+	elif(score_type == 'four'):
+		score = 4
+	elif(score_type == 'wicket'):
+		score = 2
+	
+	# find all users for the player
+	print("player is ",player)
+	clstr=Cluster()
+	session=clstr.connect('playermapping')
+	query= "select usernames from "+match+ " where player='"+player+"';"
+	user_list = session.execute(query).one()[0]
+	print("users are:    ",user_list)
+	user_list = user_list.split('|')
+	print("list of users:    ",user_list)
 
-    #update scores
-    updateUser(user_list,match,score)
-    return jsonify({'status':'done'})
-    
+	#update scores
+	updateUser(user_list,match,score)
+	return jsonify({'status':'done'})
+	
 @app.route('/dashboard',methods = ['POST', 'GET'])
 def dashboard():
+
     if request.method == 'GET':
         match = request.args.get('match')
         
@@ -236,29 +244,33 @@ def logout():
     func()
     return render_template('logout.html')
 
+
 @app.route('/getLoad',methods = ['POST', 'GET'])
 def getLoad():
-    memory = psutil.virtual_memory().percent
-    cpu = psutil.cpu_percent()
-    req = {'memory':memory,'cpu':cpu}
-    return jsonify(req)
+	memory = psutil.virtual_memory().percent
+	cpu = psutil.cpu_percent()
+	req = {'memory':memory,'cpu':cpu}
+	return jsonify(req)
 
 def heartBeat(server_id):
-    server_url = 'http://127.0.0.1:5003/heartbeat'
-    while True:	
-        print('sending heartbeat')
+	server_url = 'http://127.0.0.1:5003/heartbeat'
+	while True:	
+		# print('sending heartbeat')
 		# print("heartbeat sent -- ", service_id)
+
         r = {'service_id':str(server_id)}
         rsp = rq.post(server_url, json = r)
         print("hitting again")
         time.sleep(2)
 
 
+
 if __name__ == '__main__':
-    server_id = sys.argv[1]
-    slave_port = sys.argv[2]
-    print(server_id)
-    getLoad()
-    thread1 = threading.Thread(target = heartBeat,args=(server_id,))
-    thread1.start()    
-    app.run(port=slave_port)
+	server_id = sys.argv[1]
+	slave_port = sys.argv[2]
+	print(server_id)
+	thread1 = threading.Thread(target = heartBeat,args=(server_id,))
+	thread1.start()    
+	thread2 = threading.Thread(target = runServer,args=(slave_port,))
+	thread2.start()   
+	
