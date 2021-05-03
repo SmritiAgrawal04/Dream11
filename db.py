@@ -54,7 +54,7 @@ session=clstr.connect('playermapping')
 qry= '''
 create table Ashes (
    player text,
-   usernames list<text>,
+   usernames text,
    score int,
    primary key(player)
 );'''
@@ -63,7 +63,7 @@ session.execute(qry)
 qry= '''
 create table Wisden (
    player text,
-   usernames list<text>,
+   usernames text,
    score int,
    primary key(player)
 );'''
@@ -72,7 +72,7 @@ session.execute(qry)
 qry= '''
 create table Pataudi (
    player text,
-   usernames list<text>,
+   usernames text,
    score int,
    primary key(player)
 );'''

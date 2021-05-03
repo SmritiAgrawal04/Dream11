@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, url_for, redirect
 from cassandra.cluster import Cluster
 import os
+from cassandra.query import tuple_factory
+import threading 
 
 app = Flask(__name__)
 
@@ -35,6 +37,9 @@ def login():
         session=clstr.connect('userdb')
         query= "select password from User where username='"+username+"';"
         password= session.execute(query)[0][0]
+
+        if not password :
+            return render_template('login.html',Message='Invalid User!!')
 
         if password == request.form['pass']:
             return render_template('contest.html', username= username)
@@ -90,26 +95,75 @@ def team():
             if result:
                 # enter into DB
                 print('got username .... ',username)
-                query= "update "+match+ " set usernames= usernames + " +username+ " where player='"+player+"';"
+                print('got player .... ',player)
+                #extract
+                query= "select usernames from "+match+ " where player='"+player+"';"
+                user_list = session.execute(query)[0][0]
+                print("users.......",user_list)
+                user_list+="|"+username
+                query= "update "+match+ " SET usernames = '" +user_list+ "' where player='"+player+"';"
+                print("query..........",query)
                 session.execute(query)
             else:
                 query= "insert into "+match+ "(player, usernames, score) values (%s, %s, %s);" 
-                session.execute(query, (player, [username], 0))
+                session.execute(query, (player,username, 0))
         
         #enter username in userScore cluster
         user_session = clstr.connect('userscore')
-        # qry = 'insert into '+match+" (username,score) values ("+username+","+"0);"
-        # print(qry)
-       
-        # match = match[0].upper() 
         print('-----------------------',match)
         print('-----------------------',username)
-
-        user_session.execute("insert into ashes (username, score) values (%s, %s);", (username,0))
-
-        return render_template('dashboard.html')
+        query = "insert into "+match+ "(username, score) values (%s, %s);"
+        user_session.execute(query,(username,0))
+        
+        
+        #get all user details 
+        user_session.row_factory = tuple_factory
+        query = "select * from "+match+";"
+        user_details = user_session.execute(query) 
+        all_users=[]
+        for user in user_details:
+            # print(user)
+            user_n = user[0]
+            user_s = user[1]
+            all_users.append([user_n,user_s])
+        all_users.sort(key = lambda x: x[1],reverse = True)
+        print("all_users...............",all_users)
+        top_players = min(3,len(all_users))
+        return render_template('dashboard.html',all_users=all_users,top_players=top_players)
 
 # def dashboard():
+def updateThreads():
+    t1 = threading.Thread(target=updateUser)
+    t1.start() 
+    
+@app.route('/match_updates',methods = ['POST', 'GET']) 
+def match_updates(match,player,score_type){
+    data = request.args
+    match = data['match']
+    player = data['player']
+    score_type = data['score']
+
+    if(score_type == 'six'):
+        score = 6
+    elif(score_type == 'four'):
+        score = 4
+    elif(score_type == 'wicket'):
+        score = 2
+    
+    # find all users for the player
+    clstr=Cluster()
+    session=clstr.connect('playermapping')
+    query= "select usernames from "+match+ " where player='"+player+"';"
+    user_list = session.execute(query)
+    print("users are:    ",user_list)
+    user_list = user_list.split('|')
+    print("list of users:    ",user_list)
+
+    updateThreads()
+    
+    #update scores
+     
+}
 
 
 if __name__ == '__main__':
