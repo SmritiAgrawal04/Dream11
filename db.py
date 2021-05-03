@@ -10,6 +10,7 @@ qry= '''
 create table User (
    username text,
    password text,
+   matches text,
    primary key(username)
 );'''
 session.execute(qry)

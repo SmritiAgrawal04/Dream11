@@ -23,7 +23,7 @@ def register():
         try:
             clstr=Cluster()
             session=clstr.connect('userdb')
-            session.execute("insert into User (username, password) values (%s, %s);", (request.form["username"], request.form["pass"]))
+            session.execute("insert into User (username, password, matches) values (%s, %s, %s);", (request.form["username"], request.form["pass"], ''))
         except: 
             print ("Invalid Registration!")
         
@@ -39,14 +39,16 @@ def login():
 
         clstr=Cluster()
         session=clstr.connect('userdb')
-        query= "select password from User where username='"+username+"';"
-        password= session.execute(query)[0][0]
+        query= "select password, matches from User where username='"+username+"';"
+        result= session.execute(query)
+        password, matches= result.one()[0], result.one()[1]
+        print ("$$$$$$$$$", matches, "$$$$$$$$$$")
 
         if not password :
             return render_template('login.html',Message='Invalid User!!')
 
         if password == request.form['pass']:
-            return render_template('contest.html', username= username)
+            return render_template('contest.html', username= username, matches= matches)
         else:
              return render_template('login.html',Message='Invalid User!!')
 
@@ -89,7 +91,24 @@ def team():
             team1_NameType, team2_NameType= teams[0].split('\n')[1:12], teams[1].split('\n')[2:13]
             team1, team2, team1type, team2type= split_NameType(team1_NameType, team2_NameType)
 
-        
+
+        # save the match name corresponding to the user in the database
+        clstr=Cluster()
+        session=clstr.connect('userdb')
+        query = "select matches from User where username='"+user_n+"';"
+        curr_matches = session.execute(query).one()[0]
+        print ("**********Cur matches****", curr_matches)
+        if curr_matches == '':
+            updated_matches= match
+        else:
+            updated_matches = curr_matches+'|'+match
+
+        print('new Matches is .... ',updated_matches)
+        query= "update User SET matches = '" +updated_matches+ "' where username='"+user_n+"';"
+        session.execute(query)
+
+       
+
         return render_template('team.html', match= match, team1= team1, team2= team2, team1type= team1type, team2type= team2type, username=user_n)
 
     else:
@@ -208,6 +227,15 @@ def dashboard():
         print("all_users: ",all_users)
         return render_template('dashboard.html',all_users=all_users,top_players=top_players)
      
+
+@app.route('/logout',methods = ['POST', 'GET'])
+def logout():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+    return render_template('logout.html')
+
 @app.route('/getLoad',methods = ['POST', 'GET'])
 def getLoad():
     memory = psutil.virtual_memory().percent
@@ -224,6 +252,7 @@ def heartBeat(server_id):
         rsp = rq.post(server_url, json = r)
         print("hitting again")
         time.sleep(2)
+
 
 if __name__ == '__main__':
     server_id = sys.argv[1]

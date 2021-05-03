@@ -36,8 +36,11 @@
                   <p>Austria v/s England</p>
                 </div>
                 <div class="caption">
-                  <!-- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, </p> -->
+                  {% if 'ashes' in matches %}
+                    <a class="button" name='Ashes' href= {{ url_for('dashboard', match= 'ashes')}}>View Leaderboard</a>
+                  {% else %}
                   <a class="button" name='Ashes' href= {{ url_for('team', match= 'ashes' , username = username )}}>Create Team</a>
+                 {% endif %}
                 </div>
               </div>
             </div>
@@ -49,8 +52,11 @@
                   <p>West Indies v/s England</p>
                 </div>
                 <div class="caption">
-                  <!-- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, </p> -->
-                  <a class="button" name='Wisden' href= {{ url_for('team', match= 'wisden' , username = username )}}">Create Team</a>
+                  {% if 'wisden' in matches %}
+                    <a class="button" name='Wisden' href= {{ url_for('dashboard', match= 'wisden' )}}>View Leaderboard</a>
+                  {% else %}
+                  <a class="button" name='Wisden' href= {{ url_for('team', match= 'wisden' , username = username )}}>Create Team</a>
+                 {% endif %}
                 </div>
               </div>
             </div>
@@ -62,8 +68,11 @@
                   <p>India v/s England</p>
                 </div>
                 <div class="caption">
-                  <!-- <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, </p> -->
+                  {% if 'pataudi' in matches %}
+                    <a class="button" name='Pataudi' href= {{ url_for('dashboard', match= 'pataudi')}}>View Leaderboard</a>
+                  {% else %}
                   <a class="button" name='Pataudi' href= {{ url_for('team', match= 'pataudi' , username = username )}}>Create Team</a>
+                 {% endif %}
                 </div>
               </div>
             </div>
